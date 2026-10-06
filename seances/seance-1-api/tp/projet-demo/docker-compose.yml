@@ -1,8 +1,13 @@
 services:
   api:
     build: .
+    working_dir: /code
+    environment:
+      - PYTHONPATH=/code
     ports:
       - "8000:8000"
     volumes:
       - ./app:/code/app
+      - ./tests:/code/tests
+      - ./pytest.ini:/code/pytest.ini
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

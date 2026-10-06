@@ -1,26 +1,22 @@
 from fastapi import APIRouter, HTTPException, Query
-
 from app.schemas.reservation import ReservationCreate, ReservationRead
 
 router = APIRouter(prefix="/reservations", tags=["reservations"])
 
 FAKE_DB: dict[int, dict] = {}
-_next_id = 1
 
 
 @router.post("", response_model=ReservationRead, status_code=201)
 def create_reservation(payload: ReservationCreate):
-    global _next_id
+    reservation_id = max(FAKE_DB.keys(), default=0) + 1
 
     reservation = {
-        "id": _next_id,
+        "id": reservation_id,
         **payload.model_dump(),
         "statut": "active",
     }
 
-    FAKE_DB[_next_id] = reservation
-    _next_id += 1
-
+    FAKE_DB[reservation_id] = reservation
     return reservation
 
 
@@ -54,10 +50,7 @@ def get_reservation(reservation_id: int):
     return reservation
 
 
-@router.post(
-    "/{reservation_id}/annuler",
-    response_model=ReservationRead,
-)
+@router.post("/{reservation_id}/annuler", response_model=ReservationRead)
 def cancel_reservation(reservation_id: int):
     reservation = FAKE_DB.get(reservation_id)
 
@@ -74,5 +67,4 @@ def cancel_reservation(reservation_id: int):
         )
 
     reservation["statut"] = "annulee"
-
     return reservation

@@ -1,21 +1,16 @@
 from fastapi import APIRouter, HTTPException, Path, Query, Response
-
 from app.schemas.item import ItemCreate, ItemRead, ItemUpdate
 
 router = APIRouter(prefix="/items", tags=["items"])
 
 FAKE_DB: dict[int, dict] = {}
-_next_id = 1
 
 
 @router.post("", response_model=ItemRead, status_code=201)
 def create_item(payload: ItemCreate):
-    global _next_id
-
-    item = {"id": _next_id, **payload.model_dump()}
-    FAKE_DB[_next_id] = item
-    _next_id += 1
-
+    item_id = max(FAKE_DB.keys(), default=0) + 1
+    item = {"id": item_id, **payload.model_dump()}
+    FAKE_DB[item_id] = item
     return item
 
 
